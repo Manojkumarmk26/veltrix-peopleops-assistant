@@ -1,0 +1,4 @@
+# Optional chat UI (not part of the Docker service). Install into the same
+# environment as the API, or a separate one:  pip install -r ui/requirements.txt
+streamlit>=1.50,<2
+requests>=2.31

@@ -14,6 +14,7 @@ An HR assistant for Veltrix Systems. It answers policy and holiday questions fro
 | [docs/PROJECT_EXPLANATION.md](docs/PROJECT_EXPLANATION.md) | Problem statement, requirements, planning, architecture, implementation, testing, deployment, current status |
 | [DESIGN.md](DESIGN.md) | The 2-page design note required by the brief |
 | [.env.example](.env.example) | Every environment variable |
+| [ui/streamlit_app.py](ui/streamlit_app.py) | Optional Streamlit chat UI that calls the same API (`streamlit run ui/streamlit_app.py`); not part of the Docker service. See [STARTUP.md §4b](docs/STARTUP.md#4b-chat-ui-streamlit) |
 
 ## Architecture
 
@@ -123,7 +124,7 @@ Verification status:
 
 ## Tests
 
-`make test` (or `python -m pytest`) runs 140 tests against a temporary copy of `data/veltrix.db` and the real corpus, with `APP_TODAY=2026-10-01`. The LLM is replaced by a deterministic fake, so no network is used.
+`make test` (or `python -m pytest`) runs 149 tests against a temporary copy of `data/veltrix.db` and the real corpus, with `APP_TODAY=2026-10-01`. The LLM is replaced by a deterministic fake, so no network is used.
 
 | File | Covers |
 |---|---|
@@ -134,6 +135,7 @@ Verification status:
 | `test_integration.py` | `/chat` and `/health` status codes, session ownership, route contract, refusals, apply/change/confirm and cancel flows, clarify cases, RAG token budget, PII-free logs |
 | `test_understanding.py` | date rules (2026 default, next week, next Friday, ambiguity), guards, intents, redaction |
 | `test_config.py` | placeholder keys, `OPENAI_BASE_URL`, LLM deadline, `OPENAI_EXTRA_BODY`, JSON extraction from reasoning-model output |
+| `test_ui_client.py` | Streamlit UI client: request shape, friendly 400/401/403/503 and offline messages (skipped if `requests` is missing) |
 
 ## Sample queries
 

@@ -344,7 +344,7 @@ Interactive API docs are served at `/docs`. A fresh ingestion took about 75 s on
 ### 8.1 Automated tests
 ```powershell
 $env:HF_HOME = "$PWD\.hf_cache"
-.\conda_env\python.exe -m pytest                     # 140 tests
+.\conda_env\python.exe -m pytest                     # 149 tests
 .\conda_env\python.exe -m pytest --cov=app --cov-report=term-missing
 .\conda_env\python.exe -m pytest tests\test_leave_rules.py -v   # one module
 # with GNU make:  make test PYTHON=./conda_env/python.exe
@@ -366,8 +366,9 @@ $env:HF_HOME = "$PWD\.hf_cache"
 | `test_integration.py` | 48 | `/chat` and `/health` codes, session ownership, route contract, refusals, apply/change/confirm/cancel flows, clarify, token budget, PII-free logs, reasoning-text handling |
 | `test_understanding.py` | 22 | Date rules, guards, intents, redaction |
 | `test_config.py` | 20 | Placeholder keys, `OPENAI_BASE_URL`, LLM deadline, `OPENAI_EXTRA_BODY`, tolerant JSON extraction |
+| `test_ui_client.py` | 9 | Streamlit UI client: request shape and friendly error mapping |
 
-**Last result (verified, 19 Oct 2026): 140 passed in about 12 s on a warm index** (`test_config.py` covers key detection, endpoints, the LLM deadline, `OPENAI_EXTRA_BODY` and JSON extraction). Coverage, measured on the earlier 116-test run: 76% overall. Lowest coverage: `llm_client` 26% (real providers not called), `ocr` 32% and `chunker` 41% (the cached index skips re-chunking).
+**Last result (verified, 19 Oct 2026): 149 passed in about 12 s on a warm index** (`test_config.py` covers key detection, endpoints, the LLM deadline, `OPENAI_EXTRA_BODY` and JSON extraction). Coverage, measured on the earlier 116-test run: 76% overall. Lowest coverage: `llm_client` 26% (real providers not called), `ocr` 32% and `chunker` 41% (the cached index skips re-chunking).
 
 ### 8.2 Manual API checks (PowerShell)
 ```powershell
@@ -459,7 +460,8 @@ Checked against the code and runs on 18 Oct 2026.
 - The API contract: route contract and status codes 400/401/403/503 → 200. *(Verified by tests and the live uvicorn run.)*
 - PII-free logs and masking. *(Verified by test and live log inspection.)*
 - Project-local Conda env on D:, with caches redirected. *(Verified.)*
-- The 140-test suite. *(Verified: 116 tests on several runs, then 118, 127 and 140 after later fixes.)*
+- The 149-test suite. *(Verified: 116 tests on several runs, then 118, 127, 140 and 149 after later fixes.)*
+- The optional Streamlit chat UI (`ui/`). *(Verified in a browser against the live API: balance, policy answer with citations, apply → Confirm/Cancel, refusal, manager team leave.)*
 - The client demonstration in §11. *(Verified: replayed live against uvicorn on a fresh DB copy; every row matched.)*
 - The real LLM path with OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free`. *(Verified: 9 sample questions on a live server; all routes and citations as expected, including DE without V3, 2025 → V1, and the December `hybrid` calculation 3.5 + 3 × 1.75 = 8.75. Most answers took 1–6 s. 2 of 12 LLM calls hit the 18 s deadline and fell back to quoted passages.)*
 - README and DESIGN.md: written, and DESIGN.md is ≈940 words. The exact 2-page rendering has not been checked.

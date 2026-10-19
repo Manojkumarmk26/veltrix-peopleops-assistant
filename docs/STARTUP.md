@@ -7,7 +7,7 @@ How to install, configure, run and check the Veltrix PeopleOps Assistant. For wh
 | 1 | [Get the code and the data](#1-get-the-code-and-the-data) |
 | 2 | [Configure the LLM](#2-configure-the-llm) |
 | 3 | Run: [Docker](#3a-run-with-docker) · [Windows + Conda](#3b-run-locally-on-windows-conda-inside-the-project) · [Linux / macOS](#3c-run-locally-on-linux--macos-venv) |
-| 4 | [Check it works](#4-check-it-works) |
+| 4 | [Check it works](#4-check-it-works) · [Chat UI (Streamlit)](#4b-chat-ui-streamlit) |
 | 5 | [Run the tests](#5-run-the-tests) |
 | 6 | [Troubleshooting](#6-troubleshooting) |
 
@@ -181,11 +181,45 @@ Copy-Item data\veltrix.db data\veltrix_dev.db -Force      # then restart the API
 
 ---
 
+## 4b. Chat UI (Streamlit)
+
+An optional browser chat interface lives in `ui/`. It is a thin client: it calls the same `POST /chat` API with the chosen `X-Employee-Id`, so every permission rule still runs on the server. It is **not** part of the Docker service the reviewers run.
+
+Start the API first (section 3), then open a **second** terminal:
+
+```powershell
+cd D:\myproject\veltrix_assessment\veltrix-peopleops-assistant
+.\conda_env\python.exe -m pip install -r ui\requirements.txt     # once
+.\conda_env\python.exe -m streamlit run ui\streamlit_app.py --server.port 8501
+```
+
+Open **http://localhost:8501**. Linux / macOS: `pip install -r ui/requirements.txt && streamlit run ui/streamlit_app.py`.
+
+| Feature | How it works |
+|---|---|
+| Sign in | Pick a demo profile in the sidebar (employee, manager or HR in IN/US/DE), or type any employee ID. Switching profile starts a new conversation, because a session belongs to one employee. |
+| Suggestions | One-click starter questions that depend on the role. |
+| Answers | Each reply shows a route badge (Policy answer, Leave data, Data + policy, Needs detail, Not in documents, Refused), the response time, citation chips (document ID and section), and an expandable list of tool calls with their arguments and status. |
+| Leave changes | When the API proposes a change, **Confirm** / **Cancel** buttons appear. They send "yes" / "no" in the same session. |
+| Status | A sidebar dot shows API online, starting or offline. Errors (401 / 403 / 503 / unreachable) appear as friendly messages. |
+| Settings | API URL (default `http://127.0.0.1:8000`, or the `VELTRIX_API_URL` environment variable). |
+
+The theme is in `.streamlit/config.toml`. Run Streamlit from the project root so that file is picked up.
+
+**Verified (19 Oct 2026, in a browser against the live API):**
+- **Balance:** route `tool`, 3.5 / 12 days.
+- **Sick days:** route `rag`, citing POL-LEAVE-GLOBAL-V2.
+- **Apply for leave:** the leave-type question, then the proposal with Confirm / Cancel buttons. Cancel discarded the request.
+- **Another employee's balance:** refused.
+- **Switch to manager E2002:** history cleared, and the December team-leave question listed E2005.
+
+---
+
 ## 5. Run the tests
 
 ```powershell
 $env:HF_HOME = "$PWD\.hf_cache"
-.\conda_env\python.exe -m pytest              # 140 tests
+.\conda_env\python.exe -m pytest              # 149 tests
 # or: make test PYTHON=./conda_env/python.exe
 ```
 
