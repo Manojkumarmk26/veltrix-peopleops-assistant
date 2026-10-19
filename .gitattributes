@@ -1,0 +1,12 @@
+# Normalise line endings in the repository so the Linux container and
+# reviewers on macOS/Linux get LF, while Windows checkouts still work.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Binary files
+*.pdf binary
+*.docx binary
+*.db binary
+*.png binary
+*.jpg binary

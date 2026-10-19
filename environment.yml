@@ -1,0 +1,11 @@
+# Conda environment for local development (Python 3.11).
+# Create it INSIDE the project folder so nothing lands on C: — see
+# scripts/setup_conda_env.ps1, which also redirects the package caches.
+name: veltrix-peopleops
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - -r requirements.txt

@@ -1,0 +1,40 @@
+services:
+  veltrix-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: veltrix-peopleops-assistant:latest
+    container_name: veltrix-peopleops-assistant
+    ports:
+      - "8000:8000"
+    volumes:
+      # ./data holds veltrix.db, manifest.json and corpus/ (Section 10.1).
+      # The vector index is written to ./data/vector_store and rebuilt
+      # automatically whenever the corpus or manifest changes.
+      - ./data:/app/data
+    environment:
+      CORPUS_DIR: /app/data/corpus
+      MANIFEST_PATH: /app/data/manifest.json
+      DB_PATH: /app/data/veltrix.db
+      APP_TODAY: ${APP_TODAY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-10}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      OPENAI_EXTRA_BODY: ${OPENAI_EXTRA_BODY:-}
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-1}
+      LLM_DEADLINE_SECONDS: ${LLM_DEADLINE_SECONDS:-18}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      MAX_CORPUS_TOKENS: ${MAX_CORPUS_TOKENS:-3000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 300s

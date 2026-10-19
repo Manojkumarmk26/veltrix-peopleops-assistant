@@ -1,0 +1,58 @@
+# Data folder (provided separately; graders mount their own)
+data/
+
+# Environment files with real keys
+.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Local environments and caches (kept on D: inside the project, never committed)
+venv/
+.venv/
+env/
+conda_env/
+.conda_pkgs/
+.pip_cache/
+.hf_cache/
+.ollama_models/
+.cache/
+.smoke/
+.smoke_*.txt
+.test_out*.txt
+
+# Vector store index files
+*.faiss
+*.pkl
+vector_store/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Logs
+*.log
+
+# Misc
+*.bak
+*.tmp
