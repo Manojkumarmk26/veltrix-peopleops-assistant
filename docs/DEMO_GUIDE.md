@@ -283,7 +283,8 @@ Invoke-RestMethod http://127.0.0.1:8000/chat -Method Post -Headers $h -ContentTy
 | Scenarios in this guide | Run live through the UI on 19 Oct 2026; the screenshots are unedited |
 | HTTP error codes | 401 / 400 / 403 / 200 as listed in section 8 |
 | LLM | OpenRouter free model, with a hard deadline per call. If the model is slow or returns invalid output, the assistant falls back to a fully extractive answer with citations. |
-| Docker (`docker compose up`) | **Not run on the development machine** because the Docker daemon was not running. The Dockerfile and compose file are included; reviewers should run them as described in [STARTUP.md §3a](STARTUP.md#3a-run-with-docker). |
+| Docker (`docker compose up`), must-pass #1 | **Passed** on 19 Oct 2026. `/health` returned 200 after 66 s on a cold start (all 30 documents indexed from scratch) and after 25 s on a warm start, well inside the 10-minute limit. |
+| Modified corpus, must-pass #5 | **Passed.** Learning days were changed from 3 to 5 in the Markdown policy, and a US holiday was added in the HTML calendar. After re-ingestion the answer said 5 days, and leave on 12–13 Oct counted 1 working day instead of 2. |
 
 > [!TIP]
 > To repeat the demo from a clean state, copy `data\veltrix.db` to `data\veltrix_dev.db` again and restart the API.

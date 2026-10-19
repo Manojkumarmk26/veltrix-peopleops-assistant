@@ -178,6 +178,9 @@ curl -s localhost:8000/chat -H "Content-Type: application/json" -H "X-Employee-I
 - The planner is rule-based so that tool choice and permission decisions are repeatable. Unusual phrasings can fall through to the document route instead of a tool.
 - Conflict wording, partial answers and the upcoming-change mention depend on the LLM following the prompt. The ordering, filtering and `outranked_by` hints are computed deterministically, but the final wording is model output.
 - The real LLM path was exercised only with one free OpenRouter model (see "Verification status" above), not with OpenAI, Anthropic or Gemini. Free-tier latency varies, so some answers used the extractive fallback after the 18 s deadline.
-- The Docker image was **not** built or run on the development machine (Docker Desktop was not running there). The same app was verified under uvicorn in the project's Conda env: `/health` went 503 → 200 in under a minute on a fresh index, and `/chat` returned the expected 200/400/401/403 responses.
+- Docker was verified on the development machine (Docker Desktop 29.5.3, 19 Oct 2026):
+  - The first `docker compose build` takes about 11 min; it downloads CPU torch and bakes the embedding model into the image.
+  - After `docker compose up`, `/health` returned 200 after 66 s on a cold start (full ingestion with no saved index) and after 25 s on a warm start.
+  - Startup time depends on CPU; OCR of the scanned memo is the slowest step.
 - Default model names (`gpt-4o-mini`, `claude-3-5-haiku-latest`, `gemini-2.0-flash`) may be retired by the provider; set `LLM_MODEL` if needed.
 - Leave is whole days only; only 2026 dates are accepted (per the brief).

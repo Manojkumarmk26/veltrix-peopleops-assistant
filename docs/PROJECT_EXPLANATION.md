@@ -449,7 +449,7 @@ The server log contained no message text or e-mail addresses.
 
 ## 10. Current status and remaining work
 
-Checked against the code and runs on 18 Oct 2026.
+Checked against the code and runs on 18–19 Oct 2026.
 
 ### 10.1 Implemented and verified
 - All five tools with exact names and arguments; permission checks inside them.
@@ -465,6 +465,13 @@ Checked against the code and runs on 18 Oct 2026.
 - The client demonstration in §11. *(Verified: replayed live against uvicorn on a fresh DB copy; every row matched.)*
 - The real LLM path with OpenRouter `nvidia/nemotron-3-ultra-550b-a55b:free`. *(Verified: 9 sample questions on a live server; all routes and citations as expected, including DE without V3, 2025 → V1, and the December `hybrid` calculation 3.5 + 3 × 1.75 = 8.75. Most answers took 1–6 s. 2 of 12 LLM calls hit the 18 s deadline and fell back to quoted passages.)*
 - README and DESIGN.md: written, and DESIGN.md is ≈940 words. The exact 2-page rendering has not been checked.
+- **Must-pass #1, Docker** *(verified 19 Oct 2026, Docker Desktop 29.5.3)*:
+  - `docker compose build`: the first build took about 11 min. Image layers are cached afterwards.
+  - `docker compose up -d`: `/health` returned 200 after 25 s (warm, reusing `data/vector_store`).
+  - Cold start on a data folder with no index: full ingestion of 30 documents, 156 chunks and 47 holiday rows, and `/health` returned 200 after **66 s**.
+- **Must-pass #5, modified corpus** *(verified 19 Oct 2026 in the same container image)*. A copy of the data was changed in two places:
+  - **Learning days** in `learning_and_development_policy.md`, changed from 3 to 5. The answer changed from 3 to **5**, citing POL-LEARNING.
+  - **A new US holiday**, 12 Oct 2026, added to `holiday_calendar_us_2026.html`. It was extracted into the `holidays` table, and E3004's leave on 12–13 Oct counted **1 working day instead of 2**.
 
 ### 10.2 Problems found and fixed
 - **Restricted holidays** were counted as closures.
@@ -483,10 +490,8 @@ Checked against the code and runs on 18 Oct 2026.
 - **Future-balance arithmetic** was inconsistent ("3 months × 1.75 = 3.5"). The hybrid prompt now carries calendar facts only (remaining month-end credit dates, next service anniversary) plus an explicit calculation rule. Accrual rates still come from the documents (§6.4). It then gave 8.75 on 4 of 4 live runs.
 
 ### 10.3 Not verified / incomplete
-1. **Docker build and `docker compose up` → 200 within 10 minutes: not run.** Docker Desktop was not running, and the build would use C: space. This is must-pass check #1, so **run it before submitting**.
-2. **Graders' providers (OpenAI, Anthropic, Gemini): not run.** The real LLM path was verified only with one free OpenRouter model (§10.1). The other providers' code paths are covered only through the fake client.
-3. **The client's modified corpus and fresh DB:** the mechanisms exist (fingerprint, re-extraction, no hard-coded facts), but have only been tested with the provided data.
-4. **Git repository:** the folder is not yet a git repo. Run `git init`, check `git status` excludes `data/`, `.env`, `conda_env/` and caches, commit, and push to GitHub.
+1. **Graders' providers (OpenAI, Anthropic, Gemini): not run.** The real LLM path was verified only with one free OpenRouter model (§10.1). The other providers' code paths are covered only through the fake client.
+2. **The graders' own modified corpus** is unknown. The mechanism has been verified with a modified Markdown policy and HTML calendar (§10.1). Edited PDF or DOCX files go through the same fingerprint and re-ingestion path, but that was not tried.
 
 ### 10.4 Known limitations (also in the README)
 - The rule-based planner can misroute unusual phrasing (it falls back to the document route).
@@ -495,10 +500,11 @@ Checked against the code and runs on 18 Oct 2026.
 - Without an LLM, document answers are extractive. Some relevant but low-scoring questions (e.g. "password reset", score 0.37) return `no_answer`.
 
 ### 10.5 Before delivery checklist
-- [ ] `docker compose up --build` → `/health` 200 within 10 minutes; run the sample queries against port 8000.
+- [x] `docker compose up --build` → `/health` 200 within 10 minutes. *(25 s warm, 66 s cold; §10.1.)*
 - [x] Run the sample queries with a real LLM and review the answers and citations. *(Done with OpenRouter Nemotron, §10.1.)*
-- [ ] `git init`, check the ignore rules, commit, push to GitHub, and reply to the recruitment e-mail with the link.
-- [ ] Do not commit `.env`, keys or `./data`.
+- [x] Commit and push to GitHub: https://github.com/Manojkumarmk26/veltrix-peopleops-assistant
+- [x] Do not commit `.env`, keys or `./data`. *(`git ls-files` and a key-pattern scan are both clean.)*
+- [ ] Reply to the recruitment e-mail with the repository link.
 
 ## 11. Client demonstration
 
