@@ -1,6 +1,6 @@
 # Startup Guide
 
-How to install, configure, run and check the Veltrix PeopleOps Assistant. For what the project does and how it is built, see [PROJECT_EXPLANATION.md](PROJECT_EXPLANATION.md). For the design rationale, see [DESIGN.md](../DESIGN.md).
+How to install, configure, run and check the Veltrix PeopleOps Assistant. For what the project does and how it is built, see [PROJECT_EXPLANATION.md](PROJECT_EXPLANATION.md). For the design rationale, see [DESIGN.md](../DESIGN.md). For an illustrated walkthrough with screenshots, see [DEMO_GUIDE.md](DEMO_GUIDE.md) ([PDF](Veltrix_Demo_Guide.pdf)).
 
 | Step | What |
 |---|---|
@@ -219,7 +219,7 @@ The theme is in `.streamlit/config.toml`. Run Streamlit from the project root so
 
 ```powershell
 $env:HF_HOME = "$PWD\.hf_cache"
-.\conda_env\python.exe -m pytest              # 149 tests
+.\conda_env\python.exe -m pytest              # 154 tests
 # or: make test PYTHON=./conda_env/python.exe
 ```
 

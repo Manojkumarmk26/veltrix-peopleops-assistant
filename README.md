@@ -12,6 +12,7 @@ An HR assistant for Veltrix Systems. It answers policy and holiday questions fro
 |---|---|
 | [docs/STARTUP.md](docs/STARTUP.md) | Step-by-step install, configuration, run (Docker / Windows / Linux), verification queries, troubleshooting |
 | [docs/PROJECT_EXPLANATION.md](docs/PROJECT_EXPLANATION.md) | Problem statement, requirements, planning, architecture, implementation, testing, deployment, current status |
+| [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) · [PDF](docs/Veltrix_Demo_Guide.pdf) | Illustrated walkthrough with live screenshots: policy answers with citations, leave apply/cancel with confirmation, refusals, region/manager/HR access, API error codes |
 | [DESIGN.md](DESIGN.md) | The 2-page design note required by the brief |
 | [.env.example](.env.example) | Every environment variable |
 | [ui/streamlit_app.py](ui/streamlit_app.py) | Optional Streamlit chat UI that calls the same API (`streamlit run ui/streamlit_app.py`); not part of the Docker service. See [STARTUP.md §4b](docs/STARTUP.md#4b-chat-ui-streamlit) |
@@ -124,7 +125,7 @@ Verification status:
 
 ## Tests
 
-`make test` (or `python -m pytest`) runs 149 tests against a temporary copy of `data/veltrix.db` and the real corpus, with `APP_TODAY=2026-10-01`. The LLM is replaced by a deterministic fake, so no network is used.
+`make test` (or `python -m pytest`) runs 154 tests against a temporary copy of `data/veltrix.db` and the real corpus, with `APP_TODAY=2026-10-01`. The LLM is replaced by a deterministic fake, so no network is used.
 
 | File | Covers |
 |---|---|

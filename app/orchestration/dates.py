@@ -58,6 +58,10 @@ _RANGE_SEP = r"\s*(?:-|–|—|to|until|till|through|thru)\s*"
 _ISO = re.compile(r"\b(\d{4})-(\d{1,2})-(\d{1,2})\b")
 _DAY_RANGE_MONTH = re.compile(rf"\b{_DAY_RE}{_RANGE_SEP}{_DAY_RE}\s+(?:of\s+)?{_MONTH_RE}\b\.?{_YEAR_RE}", re.I)
 _MONTH_DAY_RANGE = re.compile(rf"\b{_MONTH_RE}\.?\s+{_DAY_RE}{_RANGE_SEP}{_DAY_RE}\b{_YEAR_RE}", re.I)
+# Day lists such as "12 and 13 October", "12, 13 and 14 Oct" or "October 12 and 13".
+_DAY_LIST = r"(\d{1,2}(?:st|nd|rd|th)?(?:\s*,\s*\d{1,2}(?:st|nd|rd|th)?)*\s*,?\s*(?:and|&)\s*\d{1,2}(?:st|nd|rd|th)?)"
+_DAY_LIST_MONTH = re.compile(rf"\b{_DAY_LIST}\s+(?:of\s+)?{_MONTH_RE}\b\.?{_YEAR_RE}", re.I)
+_MONTH_DAY_LIST = re.compile(rf"\b{_MONTH_RE}\.?\s+{_DAY_LIST}\b{_YEAR_RE}", re.I)
 _DAY_MONTH = re.compile(rf"\b{_DAY_RE}\s+(?:of\s+)?{_MONTH_RE}\b\.?{_YEAR_RE}", re.I)
 _MONTH_DAY = re.compile(rf"\b{_MONTH_RE}\.?\s+{_DAY_RE}\b(?!\s*(?:am|pm|hours?|days?))" + _YEAR_RE, re.I)
 _SLASH = re.compile(r"\b(\d{1,2})[/.](\d{1,2})(?:[/.](\d{2,4}))?\b")
@@ -116,6 +120,19 @@ def _next_weekday_after(anchor: date, weekday: int, inclusive: bool = False) -> 
     return anchor + timedelta(days=delta)
 
 
+def _is_continuous(days: list[date]) -> bool:
+    """True when the dates form one run, allowing only weekend days in the gaps."""
+    for prev, nxt in zip(days, days[1:]):
+        if nxt <= prev:
+            return False
+        gap = prev + timedelta(days=1)
+        while gap < nxt:
+            if gap.weekday() < 5:
+                return False
+            gap += timedelta(days=1)
+    return True
+
+
 def find_date_mentions(
     text: str,
     today: date,
@@ -157,6 +174,23 @@ def find_date_mentions(
         month = _month_num(m.group(1))
         add(m.span(), _safe_date(year, month, int(m.group(2))),
             _safe_date(year, month, int(m.group(3))), bool(m.group(4)), "range")
+
+    for pattern, days_group, month_group in ((_DAY_LIST_MONTH, 1, 2), (_MONTH_DAY_LIST, 2, 1)):
+        for m in pattern.finditer(text):
+            if not free(m.span()):
+                continue
+            year = int(m.group(3)) if m.group(3) else default_year
+            month = _month_num(m.group(month_group))
+            days = [_safe_date(year, month, int(n)) for n in re.findall(r"\d{1,2}", m.group(days_group))]
+            if any(d is None for d in days):
+                add(m.span(), None, None, bool(m.group(3)), "range")
+            elif _is_continuous(days):
+                add(m.span(), days[0], days[-1], bool(m.group(3)), "range")
+            else:
+                # Separate days ("12 and 15 October") are not one leave range.
+                result.ambiguous = True
+                result.notes.append(f"'{m.group(0)}' lists separate days; one request covers one date range")
+                taken.append(m.span())
 
     for pattern, day_group, month_group in ((_DAY_MONTH, 1, 2), (_MONTH_DAY, 2, 1)):
         for m in pattern.finditer(text):

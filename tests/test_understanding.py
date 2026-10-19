@@ -34,6 +34,21 @@ def test_ambiguous_and_past_phrases_are_flagged():
     assert not parse_date_range("25/12", TODAY).ambiguous  # 25 cannot be a month
 
 
+@pytest.mark.parametrize("text, start, end", [
+    ("apply for leave on 12 and 13 October", date(2026, 10, 12), date(2026, 10, 13)),
+    ("12th, 13th and 14th Oct", date(2026, 10, 12), date(2026, 10, 14)),
+    ("October 12 and 13", date(2026, 10, 12), date(2026, 10, 13)),
+    ("16 and 19 October", date(2026, 10, 16), date(2026, 10, 19)),  # Fri + Mon: weekend gap only
+])
+def test_continuous_day_list_is_one_range(text, start, end):
+    r = parse_date_range(text, TODAY)
+    assert (r.start, r.end, r.ambiguous) == (start, end, False)
+
+
+def test_separate_days_are_ambiguous():
+    assert parse_date_range("12 and 15 October", TODAY).ambiguous
+
+
 def test_reference_date_for_past_questions():
     assert extract_reference_date("What was the sick leave allowance in 2025?", TODAY) == date(2025, 12, 31)
     assert extract_reference_date("How many sick days do I get?", TODAY) is None
